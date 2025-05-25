@@ -18,4 +18,6 @@ A high-performance, optimized, real-time Angular Material UI project for Miko.
 
 - Update: tested, everything works.
 
+- By the way, I am aware that the UI looks like sh*t. Colours, arrangements, and all are not there yet. I needed to make something that works completely and I needed to do it fast... I will update the UI's look whenever I get some free time. For now, everthing works and it gives its users an advantage. I will add indicators to the charts too. They run on the servers only, currently.
+
 ![Screenshot](./public/img/SCREENSHOT.PNG "Screenshot")
