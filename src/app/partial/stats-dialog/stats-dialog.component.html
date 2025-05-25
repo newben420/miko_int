@@ -1,0 +1,18 @@
+<h1 class="my-0 py-2" mat-dialog-title><i class="bi bi-graph-up"></i> <span class="ps-2" translate>APP.STA.TITLE</span></h1>
+<mat-dialog-content class="h-auto">
+    <p class="m-0 p-0">
+        <span class="opacity-50">{{'APP.STA.LIVE' | translate}}:</span>
+        <strong class="ps-2">{{data.livePnL}}</strong>
+    </p>
+    <p class="m-0 p-0 pt-2">
+        <span class="opacity-50">{{'APP.STA.REAL' | translate}}:</span>
+        <strong class="ps-2">{{data.realizedPnL}}</strong>
+    </p>
+    <p class="m-0 p-0 pt-2">
+        <span class="opacity-50">{{'APP.STA.MARK' | translate}}:</span>
+        <strong class="ps-2">{{data.marketCondition}}</strong>
+    </p>
+</mat-dialog-content>
+<div mat-dialog-actions class="">
+    <button mat-flat-button class="w-100" [mat-dialog-close]="false">{{ "OK" | translate}}</button>
+</div>

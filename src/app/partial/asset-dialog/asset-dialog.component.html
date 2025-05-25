@@ -1,0 +1,40 @@
+<h1 mat-dialog-title class="d-flex flex-row align-items-center mt-2 justify-content-start"><mat-icon>{{isNew ? "add" :
+        "edit"}}</mat-icon> <span class="ms-2">{{ 'ASSET' | translate}}</span></h1>
+
+<div class="py-2" mat-dialog-content>
+    <form #form="ngForm">
+        <mat-form-field [appearance]="'outline'" class="w-100 mb-1">
+            <mat-label translate>BASE_TOKEN</mat-label>
+            <input [disabled]="!isNew" matInput [pattern]="pattern.token" required maxlength="100" name="base"
+                #base="ngModel" [type]="'text'" [(ngModel)]="schema.base" />
+
+            @if (base.invalid && base.dirty){
+            <mat-error translate>INP_ERR</mat-error>
+            }
+        </mat-form-field>
+        <mat-form-field [appearance]="'outline'" class="w-100 mb-1">
+            <mat-label translate>QUOTE_TOKEN</mat-label>
+            <input [disabled]="!isNew" matInput [pattern]="pattern.token" required maxlength="100" name="quote"
+                #quote="ngModel" [type]="'text'" [matAutocomplete]="auto2" [(ngModel)]="schema.quote" />
+
+            @if (quote.invalid && quote.dirty){
+            <mat-error translate>INP_ERR</mat-error>
+            }
+            <mat-autocomplete #auto2="matAutocomplete">
+                <mat-option *ngFor="let token of quotes" [value]="token">{{token}}</mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+        <div class="w-100 mt-2 mb-1">
+            <span class="fs-6 p-2 pe-3"><small translate>STATUS</small></span>
+            <mat-slide-toggle [hideIcon]="true" name="visibility" [(ngModel)]="schema.status"></mat-slide-toggle>
+        </div>
+    </form>
+</div>
+<div mat-dialog-actions>
+    <button mat-button [mat-dialog-close]="gres.err()">{{ "CANCEL" | translate}}</button>
+    <button *ngIf="!isNew" mat-button class="text-danger" [mat-dialog-close]="gres.succ(false)">{{ "DELETE" |
+        translate}}</button>
+    <button [disabled]="form.invalid || de(schema, initialSchema) || pairInUse()" mat-flat-button
+        [mat-dialog-close]="gres.succ(schema)">{{ "SAVE" |
+        translate}}</button>
+</div>

@@ -1,0 +1,14 @@
+<h1 class="my-0 py-2" mat-dialog-title><i class="bi bi-wallet-fill"></i> <span class="ps-2" translate>APP.WAL.TITLE</span></h1>
+<mat-dialog-content class="h-auto">
+    <p class="m-0 p-0">
+        <span class="opacity-50">{{'APP.WAL.BAL' | translate}}:</span>
+        <strong class="ps-2">{{data.currency || ""}} {{FN(data.balance || 0)}}</strong>
+    </p>
+    <p (click)="copy(data.address || '')" class="m-0 p-0 cp text-truncate w-100 mt-2">
+        <span class="opacity-50">{{'APP.WAL.ADD' | translate}}:</span>
+        <strong class="ps-2 {{copied ? 'col-pri' : ''}}">{{data.address}}</strong>
+    </p>
+</mat-dialog-content>
+<div mat-dialog-actions class="">
+    <button mat-flat-button class="w-100" [mat-dialog-close]="false">{{ "OK" | translate}}</button>
+</div>

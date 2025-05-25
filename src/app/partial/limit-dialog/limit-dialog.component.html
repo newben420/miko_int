@@ -1,0 +1,114 @@
+<h1 class="my-0 py-2 mb-2" mat-dialog-title>{{ "APP.LIM.CRT" | translate }}</h1>
+<mat-dialog-content class="h-auto">
+    <form #form="ngForm">
+        <div class="container-fluid m-0 p-0 overflow-hidden">
+            <div class="row m-0 p-0 overflow-hidden">
+                <div (click)="toggleBuy()"
+                    class="col-sm-12 cp m-0 p-0 d-flex flex-row overflow-hidden align-items-center justify-content-between">
+                    <button *ngIf="data.isBuy" mat-flat-button class="rounded w-50">{{ "APP.LIM.BUY" | translate
+                        }}</button>
+                    <button *ngIf="!data.isBuy" [disabled]="true" mat-button class="rounded w-50">{{ "APP.LIM.BUY" |
+                        translate }}</button>
+                    <button *ngIf="!data.isBuy" mat-flat-button="false" class="rounded w-50">{{ "APP.LIM.SELL" |
+                        translate }}</button>
+                    <button *ngIf="data.isBuy" [disabled]="true" mat-button="false" class="rounded w-50">{{
+                        "APP.LIM.SELL" | translate }}</button>
+                </div>
+            </div>
+            <div class="row m-0 p-0 overflow-hidden">
+                <div class="col-sm-12 m-0 p-0 overflow-hidden">
+                    <mat-form-field [appearance]="'outline'" class="w-100 mt-3">
+                        <span class="px-3 cp" (click)="toggleGT()" matPrefix>
+                            <strong>MC <i class="bi bi-chevron-{{data.isGreaterThan ? 'right' : 'left'}}"></i> <span
+                                    class="">{{data.currency}}</span></strong>
+                        </span>
+                        <input matInput [required]="true" [pattern]="pattern.flt" name="marketcap" #marketcap="ngModel"
+                            [type]="'number'" [(ngModel)]="data.marketcap" />
+                        @if (marketcap.invalid && marketcap.dirty){
+                        <mat-error>{{ 'APP.LIM.MC_ERR' | translate}}</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row m-0 p-0 overflow-hidden">
+                <div class="col-sm-12 m-0 p-0 overflow-hidden">
+                    <mat-chip (click)="setAmount(chip)" class="mb-2 me-2 cp {{data.amount === chip ? 'opacity-100' : 'opacity-25'}}"
+                        *ngFor="let chip of (data.isBuy ? data.buys : data.sells)">
+                        {{data.isBuy ? 'SOL' : ''}} {{chip}}{{(!data.isBuy) ? '%' : ''}}
+                    </mat-chip>
+                </div>
+            </div>
+            <div
+                class="row m-0 p-0 overflow-hidden">
+                <div class="col-sm-6 m-0 p-0 pe-sm-2 overflow-hidden h-100">
+                    <mat-form-field [appearance]="'outline'" class="pt-3 w-100">
+                        <mat-label>{{'APP.LIM.MIND' | translate}}</mat-label>
+                        <input matInput [required]="false" [pattern]="pattern.integer" name="mind"
+                            #mind="ngModel" [type]="'number'" [(ngModel)]="data.min_time" />
+                        @if (mind.invalid && mind.dirty){
+                        <mat-error>{{ 'APP.LIM.ERR' | translate}}</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+                <div class="col-sm-6 m-0 p-0 overflow-hidden h-100">
+                    <mat-form-field [appearance]="'outline'" class="pt-3 w-100">
+                        <mat-label>{{'APP.LIM.MAXD' | translate}}</mat-label>
+                        <input matInput [required]="false" [pattern]="pattern.integer" name="maxd"
+                            #maxd="ngModel" [type]="'number'" [(ngModel)]="data.max_time" />
+                        @if (maxd.invalid && maxd.dirty){
+                        <mat-error>{{ 'APP.LIM.ERR' | translate}}</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+            </div>
+            <div *ngIf="((!data.isBuy) && (!data.isGreaterThan))"
+                class="row m-0 p-0 overflow-hidden d-flex flex-row align-items-center justify-content-between">
+                <div
+                    class="col-sm-{{data.trailing ? '6' : '12 mt-3'}} m-0 p-0 h-100 overflow-hidden d-flex flex-row align-items-center justify-content-start">
+                    <span>{{ 'APP.LIM.TRAIL' | translate}}</span>
+                    <mat-slide-toggle name="trail" (change)="toggleTrail($event.checked)" [hideIcon]="true" class="ms-3"
+                        [(ngModel)]="data.trailing" color="primary">
+                    </mat-slide-toggle>
+                </div>
+                <div *ngIf="data.trailing" class="col-sm-6 m-0 p-0 overflow-hidden h-100">
+                    <mat-form-field [appearance]="'outline'" class="mt-3 w-100">
+                        <mat-label>{{'APP.LIM.PL' | translate}}</mat-label>
+                        <input matInput [required]="true" [pattern]="pattern.flt" [min]="1" [max]="100" name="perc"
+                            #perc="ngModel" [type]="'number'" [(ngModel)]="data.perc" />
+                        @if (perc.invalid && perc.dirty){
+                        <mat-error>{{ 'APP.LIM.PL_ERR' | translate}}</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+            </div>
+            <div *ngIf="((!data.isBuy) && (!data.isGreaterThan) && (data.trailing))"
+                class="row m-0 p-0 overflow-hidden">
+                <div class="col-sm-6 m-0 p-0 pe-sm-2 overflow-hidden h-100">
+                    <mat-form-field [appearance]="'outline'" class="pt-3 w-100">
+                        <mat-label>{{'APP.LIM.MINPNL' | translate}}</mat-label>
+                        <input matInput [required]="true" [pattern]="pattern.flt" name="minpnl"
+                            #minpnl="ngModel" [type]="'number'" [(ngModel)]="data.min_sell_pnl" />
+                        @if (minpnl.invalid && minpnl.dirty){
+                        <mat-error>{{ 'APP.LIM.ERR' | translate}}</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+                <div class="col-sm-6 m-0 p-0 overflow-hidden h-100">
+                    <mat-form-field [appearance]="'outline'" class="pt-3 w-100">
+                        <mat-label>{{'APP.LIM.MAXPNL' | translate}}</mat-label>
+                        <input matInput [required]="true" [pattern]="pattern.flt" name="maxpnl"
+                            #maxpnl="ngModel" [type]="'number'" [(ngModel)]="data.max_sell_pnl" />
+                        @if (maxpnl.invalid && maxpnl.dirty){
+                        <mat-error>{{ 'APP.LIM.ERR' | translate}}</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+    </form>
+</mat-dialog-content>
+<div mat-dialog-actions class="mt-2">
+    <button mat-button [mat-dialog-close]="gres.err()">{{ "CANCEL" | translate}}</button>
+    <button [disabled]="!valid(form.valid ?? false)" mat-flat-button [mat-dialog-close]="gres.succ(data)">{{ "SUBMIT" |
+        translate}}</button>
+</div>

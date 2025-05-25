@@ -1,0 +1,87 @@
+@use "@angular/material" as mat;
+
+$hh: 45px;
+$sw: 300px;
+
+mat-sidenav {
+    max-width: 100vw;
+    background-color: var(--mat-sys-background);
+}
+
+.logo{
+    height: 30px;
+    transition: all 150ms ease-in-out;
+}
+
+.pref{
+    max-width: 700px;
+}
+
+.obs{
+    max-width: 1200px;
+}
+
+.discon{
+    filter: grayscale(100);
+    -webkit-filter: grayscale(100);
+}
+
+.mxx{
+    max-width: 2000px;
+}
+
+.mhx{
+    height: 200px;
+}
+
+.mhy{
+    min-height: 50px;
+}
+
+.chartbtn{
+    top: 0px;
+    right: 0px;
+    z-index: 1;
+}
+
+.tx{
+    height: calc(100vh - $hh);
+    max-height: calc(100vh - $hh);
+    min-height: calc(100vh - $hh);
+}
+
+.tr{
+    transition: all 100ms linear;
+}
+
+.menubtn{
+    transition: all 100ms linear;
+    bottom: 20px;
+    opacity: 0.5;
+    right: 20px;
+    height: $hh;
+    width: $hh;
+    background: var(--mat-sys-primary);
+    color: var(--mat-sys-surface);
+}
+.titlebox, .menubtn{
+    z-index: 0;
+}
+.menubtn:hover{
+    opacity: 1;
+}
+
+@media only screen and (max-width: 768px) {
+    .menubtn.active{
+        right: calc((5px + $hh) * -1);
+    }
+}
+
+.logo2{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    max-width: 250px;
+    max-height: 250px;
+    opacity: 0.5;
+}

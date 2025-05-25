@@ -1,0 +1,15 @@
+<h1 class="my-0 py-2" mat-dialog-title>{{ data.title | translate }}</h1>
+<mat-dialog-content class="h-auto">
+    <p *ngIf="data.subtitle" class="my-0 pb-2"><small>{{ data.subtitle | translate }}</small></p>
+    <mat-form-field *ngFor="let item of data.items; index as i" [appearance]="'outline'"
+        class="w-100 py-2 overflow-visible">
+        <mat-label>{{item.label | translate}}</mat-label>
+        <input matInput [name]="'item_'+i" [type]="'text'" [readonly]="true" [(ngModel)]="item.value" />
+        <div class="px-2 cp" mat-icon-button matSuffix (click)="copy(item.value, i)">
+            <mat-icon>{{item.copied ? 'check' : 'content_copy'}}</mat-icon>
+        </div>
+    </mat-form-field>
+</mat-dialog-content>
+<div mat-dialog-actions class="">
+    <button [disabled]="allCopied()" mat-flat-button class="w-100" [mat-dialog-close]="false">{{ "OK" | translate}}</button>
+</div>

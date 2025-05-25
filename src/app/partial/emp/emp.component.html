@@ -1,0 +1,5 @@
+<div class="w-100 overflow-hidden py-5 opacity-50 px-2 d-flex flex-column align-items-center justify-content-center">
+    <span *ngIf="loaded" class="moji lh1"><mat-icon [inline]="true">mood_bad</mat-icon></span>
+    <p *ngIf="loaded" class="m-0 p-0 text-center overflow-hidden mt-1 fs-6 fw-normal"><small>{{ message | translate}}</small></p>
+    <mat-spinner *ngIf="!loaded" [diameter]="50"></mat-spinner>
+</div>

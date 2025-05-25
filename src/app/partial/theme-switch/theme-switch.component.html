@@ -1,0 +1,4 @@
+<mat-slide-toggle (change)="setTheme()" [(ngModel)]="dark" [hideIcon]="true">
+    <mat-icon class="mx-2" *ngIf="dark">dark_mode</mat-icon>
+    <mat-icon class="mx-2" *ngIf="!dark">light_mode</mat-icon>
+</mat-slide-toggle>

@@ -1,0 +1,631 @@
+<mat-tab-group (selectedIndexChange)="tabSwitch($event)" [animationDuration]="0" [selectedIndex]="selectedTabIndex"
+    [mat-align-tabs]="''" class="h-100">
+    <mat-tab [disabled]="true"
+        [labelClass]="'opacity-100 w40 cp d-flex flex-row align-items-center justify-content-start'">
+        <ng-template mat-tab-label>
+            <img src="{{logo}}" alt="{{title}}" class="logo cp {{connected ? '' : 'discon'}}">
+            <span class="lead fs-6 ms-2">{{title | titlecase}}</span>
+        </ng-template>
+    </mat-tab>
+    <mat-tab>
+        <ng-template mat-tab-label>
+            <span translate>APP.TAB.T1</span>
+        </ng-template>
+        <ng-template matTabContent>
+            <mat-sidenav-container class="tx tr">
+                <mat-sidenav [(opened)]="opened"
+                    class="tr rounded-0 tx {{windowWidth > widthBreakPoint ? '' : 'mobile sidenav-mobilexxx'}} overflow-x-hidden sidenav rounded-0"
+                    #sidenav [style]="{width: windowWidth > widthBreakPoint ? '340px': 'calc(100vw - 100px)'}"
+                    [mode]="windowWidth > widthBreakPoint ? 'side' : 'over'">
+                    <div class="p-3 w-100 overflow-hidden mt-3">
+                        <div *ngIf="connected" class="w-100 mb-3">
+                            <button mat-flat-button (click)="initialLoad()" class="rounded me-3 mb-3"><i
+                                    class="bi bi-arrow-clockwise me-2"></i> {{'APP.ACT.REL' | translate}}
+                            </button>
+                            <button mat-flat-button (click)="wallet()" class="rounded me-3 mb-3"><i
+                                    class="bi bi-wallet-fill me-2"></i> {{'APP.ACT.WAL' | translate}}
+                            </button>
+                            <button mat-flat-button (click)="recover()" class="rounded me-3 mb-3"><i
+                                    class="bi bi-x-lg me-2"></i> {{'APP.ACT.REC' | translate}}
+                            </button>
+                            <button mat-flat-button (click)="stats()" class="rounded me-3 mb-3"><i
+                                    class="bi bi-graph-up me-2"></i> {{'APP.ACT.STA' | translate}}
+                            </button>
+                            <button mat-flat-button (click)="addToken()" class="rounded me-3 mb-3"><i
+                                    class="bi bi-plus-circle-fill me-2"></i> {{'APP.TOKENS.ADD' | translate}}
+                            </button>
+                            <button mat-flat-button (click)="logout()" class="rounded me-3 mb-3"><i
+                                    class="bi bi-door-closed-fill me-2"></i> {{'APP.LOGOUT.TITLE' | translate}}
+                            </button>
+                        </div>
+                        <mat-expansion-panel (expandedChange)="exp($event, 'exp_tok')" class="shadowx rounded"
+                            [expanded]="tokensExpanded" [hideToggle]="true">
+                            <mat-expansion-panel-header>{{'APP.TOKENS.TITLE' | translate}} <span
+                                    *ngIf="attrCount(tokens) > 0"
+                                    class="ms-2">({{FM(attrCount(tokens))}})</span></mat-expansion-panel-header>
+                            <div class="w-100 overflow-hidden">
+                                <div *ngIf="attrCount(tokens) > 0" class="w-100 overflow-hidden">
+                                    <mat-card [appearance]="'outlined'"
+                                        class="rounded {{tok.mint == token ? 'bg-bg' : ''}} overflow-hidden mb-2"
+                                        *ngFor="let tok of obj2arr(tokens)">
+                                        <mat-card-header class="overflow-hidden w-100">
+                                            <mat-card-title class="">
+                                                {{tok.name}}
+                                            </mat-card-title>
+                                            <mat-card-subtitle
+                                                class="d-flex overflow-hidden flex-wrap w-100 flex-row align-items-center justofy-content-between">
+                                                <small class="sm overflow-hidden me-3">
+                                                    {{tok.symbol}} <span [innerHTML]="FFD(tok.amount)"></span>
+                                                    <span *ngIf="tok.pnl">
+                                                        <i class="bi bi-coin mx-2"></i>
+                                                        <span
+                                                            class="{{tok.pnl > 0 ? 'text-success' : 'text-danger'}}">{{FFD(tok.pnl)}}%</span>
+                                                    </span>
+                                                </small>
+                                                <button (click)="removeToken(tok.mint)"
+                                                    class="btn btn-sm sm me-3 btn-danger"><i
+                                                        class="bi bi-trash"></i></button>
+                                                <button (click)="openToken(tok.mint)"
+                                                    class="btn btn-sm sm col-surf rounded bg-pri"><i
+                                                        class="bi bi-three-dots"></i></button>
+                                            </mat-card-subtitle>
+                                        </mat-card-header>
+                                        <mat-card-content></mat-card-content>
+                                    </mat-card>
+                                </div>
+                                <div *ngIf="attrCount(tokens) <= 0" class="w-100 overflow-hidden">
+                                    <app-emp [message]="'APP.TOKENS.NONE'" [loaded]="tokensLoaded"></app-emp>
+                                </div>
+                            </div>
+                        </mat-expansion-panel>
+                        <p class="sm m-0 text-center p-0 py-1 opacity-50 mt-4">
+                            {{title}} &copy; {{year()}}
+                            <span *ngIf="solPrice">
+                                <br>
+                                {{base}} = USD {{solPrice}}
+                            </span>
+                        </p>
+                    </div>
+                </mat-sidenav>
+                <mat-sidenav-content class="tr rouned-0 tx bg-surf">
+                    <div *ngIf="tokens[token]" class="w-100 p-3 m-0 mxx">
+                        <div class="container-fluid m-0 p-0">
+                            <div class="row m-0 p-0">
+                                <div
+                                    class="col-md-12 m-0 p-0 d-flex flex-row align-items-center justify-content-between">
+                                    <h1 class="display-6 m-0 p-0">{{tokens[token].name}}</h1>
+                                    <div class="d-flex flex-row align-items-center justify-content-end">
+                                        <button (click)="removeToken(token)"
+                                            class="btn ms-2 btn-sm sm ms-3 btn-danger"><i
+                                                class="bi bi-trash"></i></button>
+                                        <button (click)="closeToken()" class="btn ms-2 btn-sm sm ms-3 btn-danger"><i
+                                                class="bi bi-x-lg"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row m-0 p-0 pt-3">
+                                <div class="col-md-8 h-100 m-0 p-0 pb-3 pb-md-0 pe-0 pe-md-3">
+                                    <mat-expansion-panel [expanded]="expChart" (expandedChange)="exp($event, 'exp_cha')"
+                                        class="shadowx bg-bg rounded" [hideToggle]="false">
+                                        <mat-expansion-panel-header><i class="bi bi-calendar-fill me-2"></i>
+                                            {{'APP.TOKENS.PRICE_HIST' | translate}}</mat-expansion-panel-header>
+                                        <div class="w-100 overflow-hidden position-relative">
+                                            <div *ngIf="isChart" class="w-100 overflow-hidden">
+                                                <button (click)="changeOpt(opt)" *ngFor="let opt of chartOpts"
+                                                    class="btn btn-sm col-surf sm py-1 px-2 mb-2 me-2 {{opt == currentOpt ? 'bg-pri' : 'bg-secondary'}}">{{GTE(0,
+                                                    (opt * interval))}}</button>
+                                            </div>
+                                            <div [style.height]="(chartHeight && isChart) ? (chartHeight+'px') : ''"
+                                                class="w-100 overflow-hidden {{isChart ? (chartHeight ? '' : 'mhx') : 'mhy'}} tr mb-2">
+                                                <button (click)="toggleChart()"
+                                                    class="btn position-absolute chartbtn btn-sm sm {{isChart ? 'bg-pri col-surf' : 'btn-secondary'}} opacity-50"><i
+                                                        class="bi bi-graph-up"></i></button>
+                                                <div *ngIf="isChart"
+                                                    class="w-100 h-100 overflow-auto rounded chart-container">
+                                                    <app-candlestick-chart [data]="chartData"
+                                                        #chartElement></app-candlestick-chart>
+                                                </div>
+                                                <div *ngIf="!isChart"
+                                                    class="w-100 overflow-hidden d-flex flex-column align-items-center justify-content-center">
+                                                    <div class="py-3 px-1">
+                                                        <p class="m-0 p-0 mb-1 sm d-flex flex-row align-items-center justify-content-start"
+                                                            *ngFor="let d of pricehist">
+                                                            {{d.title}} <i
+                                                                class="bi {{d.delta > 0 ? 'bi-caret-up-fill text-success sm1' : d.delta < 0 ? 'bi-caret-down-fill text-danger' : 'bi-diamond-fill'}} ms-2 me-1"></i>
+                                                            <strong
+                                                                class="{{d.delta > 0 ? 'text-success' : d.delta < 0 ? 'text-danger' : ''}}">{{d.delta}}%</strong>
+                                                        </p>
+                                                        <span *ngIf="(tokenData.price_history || []).length == 0"
+                                                            class="sm opacity-50 fst-italic ">{{'APP.TOKENS.NE_DATA' |
+                                                            translate}}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </mat-expansion-panel>
+                                    <div *ngIf="showRem" class="w-100">
+                                        <mat-card [appearance]="'outlined'"
+                                            class="rounded w-100 border-0 mt-3 overflow-hidden mb-3 mb-md-0">
+                                            <mat-card-header class="p-0 overflow-hidden pt-0 px-0">
+                                                <mat-card-title class="overflow-hidden lh1 m-0 p-0"><span
+                                                        class="sm1 opacity-50 fst-italic">{{'APP.TOKENS.REM' |
+                                                        translate}}</span></mat-card-title>
+                                            </mat-card-header>
+                                            <mat-card-content class="p-0 px-0 pt-1 pb-0">
+                                                <div
+                                                    class="w-100 d-flex flex-row overflow-hidden flex-wrap align-items-center justify-content-start">
+                                                    <div class="source">
+                                                        <span
+                                                            class="d-inline-block badge bg-success sm col-surf rounded me-2 mb-2">{{tokenData.source}}</span>
+                                                    </div>
+                                                    <span *ngIf="(tokenData.entry_reasons || []).length > 0"
+                                                        class="buy">
+                                                        <span
+                                                            class="d-inline-block badge bg-pri sm col-surf rounded me-2 mb-2"
+                                                            *ngFor="let rem of (tokenData.entry_reasons || [])">{{rem}}</span>
+                                                    </span>
+                                                    <span *ngIf="(tokenData.exit_reasons || []).length > 0" class="buy">
+                                                        <span
+                                                            class="d-inline-block badge bg-secondary sm col-surf rounded me-2 mb-2"
+                                                            *ngFor="let rem of (tokenData.exit_reasons || [])">{{rem}}</span>
+                                                    </span>
+                                                </div>
+                                            </mat-card-content>
+                                        </mat-card>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 h-100 m-0 p-0">
+                                    <p (click)="toggleStat()" class="m-0 p-0 cp mb-2 w-100 overflow-hidden">
+                                        <span class="fs-6">
+                                            <span matTooltip="{{'APP.TOKENS.PRICE' | translate}}" class="price me-3">
+                                                <i class="bi bi-coin me-2"></i>
+                                                <strong>
+                                                    <span class="text-nowrap"
+                                                        [innerHTML]="FFD(tokenData.current_price || 0)">
+                                                    </span>
+                                                </strong>
+                                            </span>
+                                            <span matTooltip="{{'APP.TOKENS.MC' | translate}}" class="mc">
+                                                <i class="bi bi-bank me-2"></i>
+                                                <span class="base text-nowrap me-2">
+                                                    {{base}}
+                                                    <strong>
+                                                        <span [innerHTML]="FFD(tokenData.current_marketcap || 0)">
+                                                        </span>
+                                                    </strong>
+                                                </span>
+                                                <span class="usd text-nowrap me-2">
+                                                    USD
+                                                    <strong>
+                                                        <span
+                                                            [innerHTML]="FFD((tokenData.current_marketcap || 0) * solPrice)">
+                                                        </span>
+                                                    </strong>
+                                                </span>
+                                                <span class="peak text-nowrap me-2">
+                                                    <i class="bi bi-emoji-smile-fill me-2"></i>
+                                                    {{baseDenominated ? base : 'USD'}}
+                                                    <strong>
+                                                        <span
+                                                            [innerHTML]="FFD((tokenData.max_marketcap || 0) * (baseDenominated ? 1 : solPrice))">
+                                                        </span>
+                                                    </strong>
+                                                </span>
+                                                <span class="least text-nowrap me-2">
+                                                    <i class="bi bi-emoji-frown-fill me-2"></i>
+                                                    {{baseDenominated ? base : 'USD'}}
+                                                    <strong>
+                                                        <span
+                                                            [innerHTML]="FFD((tokenData.min_marketcap || 0) * (baseDenominated ? 1 : solPrice))">
+                                                        </span>
+                                                    </strong>
+                                                </span>
+                                            </span>
+                                        </span>
+                                    </p>
+                                    <div *ngIf="expStat" class="w-100 overflow-hidden">
+                                        <div class="sm mb-3 col-pri">
+                                            <span matTooltip="{{'APP.TOKENS.RG_TS' | translate}}" class="">
+                                                <i class="bi bi-clock-fill me-1"></i> <span
+                                                    class="me-3">{{GTE((tokenData.reg_timestamp || currentTime),
+                                                    currentTime)}}</span>
+                                            </span>
+                                            <span matTooltip="{{'APP.TOKENS.LU_TS' | translate}}" class="">
+                                                <i class="bi bi-arrow-clockwise me-1"></i> <span
+                                                    class="me-3">{{GTE((tokenData.last_updated || currentTime),
+                                                    currentTime)}}</span>
+                                            </span>
+                                            <span matTooltip="{{'APP.TOKENS.CRC' | translate}}" class="">
+                                                <i class="bi bi-graph-up me-1"></i> <span class="me-3"><span
+                                                        [innerHTML]="FFD((tokenData.price_history || []).length)"></span>
+                                                    /
+                                                    <span [innerHTML]="FFD(maxCDSlength)"></span></span>
+                                            </span>
+                                        </div>
+                                        <mat-card *ngIf="(tokenData.amount_held || 0) > 0" [appearance]="'outlined'"
+                                            class="rounded w-100 overflow-hidden mb-3">
+                                            <mat-card-header class="p-0 overflow-hidden pt-1 px-3">
+                                                <mat-card-title class="overflow-hidden lh1 m-0 p-0"><span
+                                                        class="sm1 opacity-50 fst-italic">{{'APP.TOKENS.AMT' |
+                                                        translate}}</span></mat-card-title>
+                                            </mat-card-header>
+                                            <mat-card-content class="p-0 px-3 pt-1 pb-3">
+                                                <div
+                                                    class="w-100 d-flex flex-row overflow-hidden align-items-center justify-content-between">
+                                                    <div
+                                                        class="w-50 overflow-hidden d-flex flex-column align-items-start pe-2 justify-content center">
+                                                        <span
+                                                            class="sm col-pri overflow-hidden">{{tokenData.symbol}}</span>
+                                                        <span class="lead overflow-hidden"><strong><span
+                                                                    [innerHTML]="FFD(tokenData.amount_held || 0)"></span></strong></span>
+                                                    </div>
+                                                    <div
+                                                        class="w-50 overflow-hidden d-flex flex-column align-items-start justify-content center">
+                                                        <span class="sm overflow-hidden"><span
+                                                                class="col-pri me-2">{{base}}</span> <strong><span
+                                                                    [innerHTML]="FFD((tokenData.amount_held || 0) * (tokenData.current_price || 0))"></span></strong></span>
+                                                        <span class="sm overflow-hidden"><span
+                                                                class="col-pri me-2">USD</span> <strong><span
+                                                                    [innerHTML]="FFD((tokenData.amount_held || 0) * (tokenData.current_price || 0) * solPrice)"></span></strong></span>
+                                                    </div>
+                                                </div>
+                                            </mat-card-content>
+                                        </mat-card>
+                                        <mat-card
+                                            *ngIf="(tokenData.pnl || 0) || (tokenData.min_pnl || 0) || (tokenData.max_pnl || 0)"
+                                            [appearance]="'outlined'" class="rounded w-100 overflow-hidden">
+                                            <mat-card-header class="p-0 overflow-hidden pt-1 px-3">
+                                                <mat-card-title class="overflow-hidden lh1 m-0 p-0"><span
+                                                        class="sm1 opacity-50 fst-italic">{{'APP.TOKENS.PNL' |
+                                                        translate}}</span></mat-card-title>
+                                            </mat-card-header>
+                                            <mat-card-content class="p-0 px-3 pt-1 pb-3">
+                                                <div
+                                                    class="w-100 d-flex flex-row overflow-hidden align-items-center justify-content-between">
+                                                    <div
+                                                        class="w-50 overflow-hidden d-flex flex-column align-items-start pe-2 justify-content center">
+                                                        <strong>
+                                                            <span
+                                                                class="sm {{(tokenData.pnl || 0) > 0 ? 'text-success' : (tokenData.pnl || 0) < 0 ? 'text-danger' : ''}} overflow-hidden"
+                                                                [innerHTML]="FFD(tokenData.pnl || 0) + '%'">
+                                                            </span>
+                                                        </strong>
+                                                        <span
+                                                            class="lead overflow-hidden {{(tokenData.pnl || 0) > 0 ? 'text-success' : (tokenData.pnl || 0) < 0 ? 'text-danger' : ''}}">{{base}}
+                                                            <strong>
+                                                                <span [innerHTML]="FFD(tokenData.pnl_base || 0)">
+                                                                </span>
+                                                            </strong>
+                                                        </span>
+                                                    </div>
+                                                    <div
+                                                        class="w-50 overflow-hidden d-flex flex-column align-items-start justify-content center">
+                                                        <span
+                                                            class="sm overflow-hidden {{(tokenData.pnl || 0) > 0 ? 'text-success' : (tokenData.pnl || 0) < 0 ? 'text-danger' : 'text-secondary'}}">
+                                                            <span class="me-2">USD</span>
+                                                            <strong>
+                                                                <span
+                                                                    [innerHTML]="FFD((tokenData.pnl_base || 0) * solPrice)"></span>
+                                                            </strong>
+                                                        </span>
+                                                        <span
+                                                            class="sm overflow-hidden {{(tokenData.max_pnl || 0) > 0 ? 'text-success' : (tokenData.max_pnl || 0) < 0 ? 'text-danger' : 'text-secondary'}}">
+                                                            <span class="me-2">{{'APP.TOKENS.MAX' | translate}}</span>
+                                                            <strong>
+                                                                <span
+                                                                    [innerHTML]="FFD((tokenData.max_pnl || 0)) + '%'"></span>
+                                                            </strong>
+                                                        </span>
+                                                        <span
+                                                            class="sm overflow-hidden {{(tokenData.min_pnl || 0) > 0 ? 'text-success' : (tokenData.min_pnl || 0) < 0 ? 'text-danger' : 'text-secondary'}}">
+                                                            <span class="me-2">{{'APP.TOKENS.MIN' | translate}}</span>
+                                                            <strong>
+                                                                <span
+                                                                    [innerHTML]="FFD((tokenData.min_pnl || 0)) + '%'"></span>
+                                                            </strong>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </mat-card-content>
+                                        </mat-card>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row m-0 p-0 pt-3" *ngIf="(tokenData.current_price || 0) > 0">
+                                <div
+                                    class=" m-0 p-0 {{(tokenData.amount_held || 0) > 0 ? 'col-sm-6 pb-3 pb-sm-0 pe-0 pe-sm-3' : 'col-sm-12'}}">
+                                    <mat-expansion-panel [expanded]="expBuy" (expandedChange)="exp($event, 'exp_buy')"
+                                        class="shadowx bg-bg rounded" [hideToggle]="false">
+                                        <mat-expansion-panel-header><i class="bi bi-currency-exchange me-2"></i>
+                                            {{'APP.TOKENS.BUY' | translate}}</mat-expansion-panel-header>
+                                        <div class="w-100 overflow-hidden">
+                                            <mat-chip class="me-3 me-sm-2 rounded cp mb-3 mb-sm-2"
+                                                (click)="buy(token, amt)" *ngFor="let amt of buys">{{base}}
+                                                {{amt}}</mat-chip>
+                                        </div>
+                                    </mat-expansion-panel>
+                                </div>
+                                <div *ngIf="(tokenData.amount_held || 0) > 0" class="col-sm-6 m-0 p-0">
+                                    <mat-expansion-panel [expanded]="expSell" (expandedChange)="exp($event, 'exp_sel')"
+                                        class="shadowx bg-bg rounded" [hideToggle]="false">
+                                        <mat-expansion-panel-header><i class="bi bi-currency-exchange me-2"></i>
+                                            {{'APP.TOKENS.SELL' | translate}}</mat-expansion-panel-header>
+                                        <div class="w-100 overflow-hidden">
+                                            <mat-chip class="me-3 me-sm-2 rounded cp mb-3 mb-sm-2"
+                                                (click)="sell(token, amt)" *ngFor="let amt of sells">{{amt}}%</mat-chip>
+                                        </div>
+                                    </mat-expansion-panel>
+                                </div>
+                            </div>
+                            <div class="row m-0 p-0 pt-3">
+                                <div class="col-sm-12 m-0 p-0">
+                                    <mat-expansion-panel [expanded]="expLimit" (expandedChange)="exp($event, 'exp_lim')"
+                                        class="shadowx bg-bg rounded" [hideToggle]="false">
+                                        <mat-expansion-panel-header><i class="bi bi-hourglass-split me-2"></i>
+                                            {{'APP.TOKENS.PLO' | translate}}</mat-expansion-panel-header>
+                                        <div class="w-100 overflow-hidden">
+                                            <mat-chip (click)="deleteLimitOrder(i, order)"
+                                                class="me-3 me-sm-2 rounded cp mb-3 mb-sm-2"
+                                                *ngFor="let order of (tokenData.pending_orders || []); index as i">
+                                                <span>
+                                                    <i
+                                                        class="bi {{order.trailing ? 'bi-magnet-fill' : order.type == 'buy' ? 'bi-hourglass-top' : 'bi-hourglass-bottom'}} me-1"></i>
+                                                    {{order.type == "buy" ? base : ''}}
+                                                    {{order.amount}}{{order.type == "sell" ? '%' : ''}} <i
+                                                        class="bi bi-grid-fill mx-1"></i>
+                                                    MC <i
+                                                        class="bi {{((order.type == 'buy' && (order.marketcap || 0) > 0) || (order.type == 'sell' && (order.marketcap || 0) < 0)) ? 'bi-chevron-left' : 'bi-chevron-right'}}"></i>
+                                                    {{baseDenominated ? base : 'USD'}} {{FFD(abs(order.marketcap ||
+                                                    0))}}
+                                                </span>
+                                                <i class="bi bi-x-lg text-danger ms-1"></i>
+                                            </mat-chip>
+                                            <button (click)="limitOrder()"
+                                                class="btn btn-sm sm rounded bg-pri col-surf"><i
+                                                    class="bi bi-plus-circle-fill"></i></button>
+                                        </div>
+                                    </mat-expansion-panel>
+                                </div>
+                            </div>
+                            <div class="row m-0 p-0 pt-3">
+                                <div *ngIf="(tokenData.whaleLog || []).length > 0"
+                                    class=" m-0 p-0 {{tokenData.description ? 'col-sm-6 pb-3 pb-sm-0 pe-0 pe-sm-3' : 'col-sm-12'}}">
+                                    <mat-expansion-panel [expanded]="expWhale" (expandedChange)="exp($event, 'exp_wha')"
+                                        class="shadowx bg-bg rounded" [hideToggle]="false">
+                                        <mat-expansion-panel-header><i class="bi bi-clock-history me-2"></i>
+                                            {{'APP.TOKENS.WL' | translate}}</mat-expansion-panel-header>
+                                        <div class="w-100 overflow-hidden">
+                                            <p class="m-0 p-0 sm pb-1"
+                                                *ngFor="let log of rev(tokenData.whaleLog || [])">
+                                                <i class="bi bi-arrow-right me-1"></i> {{log}}
+                                            </p>
+                                        </div>
+                                    </mat-expansion-panel>
+                                </div>
+                                <div *ngIf="tokenData.description"
+                                    class=" m-0 p-0 {{(tokenData.whaleLog || []).length > 0 ? 'col-sm-6' : 'col-sm-12'}}">
+                                    <mat-expansion-panel [expanded]="expDesc" (expandedChange)="exp($event, 'exp_des')"
+                                        class="shadowx bg-bg rounded" [hideToggle]="false">
+                                        <mat-expansion-panel-header><i class="bi bi-pencil-square me-2"></i>
+                                            {{'APP.TOKENS.DESC' | translate}}</mat-expansion-panel-header>
+                                        <div class="w-100 overflow-hidden">
+                                            {{tokenData.description}}
+                                        </div>
+                                    </mat-expansion-panel>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div *ngIf="!tokens[token]"
+                        class="w-100 titlebox h-100 opacity-25 d-flex flex-row align-items-center justify-content-center p-3">
+                        <img src="{{logo}}" alt="{{title}}" class="logo2 discon">
+                    </div>
+                    <button (click)="toggleSide()"
+                        class="position-fixed d-flex flex-row align-items-center justify-content-center shadow border-0 {{opened ? 'active' : ''}} rounded menubtn">
+                        <i class="fs-4 bi {{opened ? 'bi-arrow-left' : 'bi-list'}}"></i>
+                    </button>
+                </mat-sidenav-content>
+            </mat-sidenav-container>
+        </ng-template>
+    </mat-tab>
+    <mat-tab class="">
+        <ng-template mat-tab-label>
+            <span translate>APP.TAB.T2</span>
+        </ng-template>
+        <ng-template matTabContent>
+            <div class="w-100 overflow-hidden p-3">
+                <div class="obs w-100 mx-auto my-5 p-0 overflow-hidden">
+                    <mat-card class="shadow-sm bg-bg" [appearance]="'outlined'">
+                        <mat-card-header>
+                            <mat-card-title>{{ 'APP.OBS.TITLE' | translate }}</mat-card-title>
+                            <mat-card-subtitle class="opacity-50">
+                                <small>
+                                    {{FM(kiko.allTokens || 0)}} {{ 'APP.OBS.ALL' | translate }} <i
+                                        class="bi bi-heart-fill mx-2"></i>
+                                    {{FM(kiko.currentTokens || 0)}} {{ 'APP.OBS.CUR' | translate }} <i
+                                        class="bi bi-heart-fill mx-2"></i>
+                                    {{FM(kiko.graduatedTokens || 0)}} {{ 'APP.OBS.GRA' | translate }} <i
+                                        class="bi bi-heart-fill mx-2"></i>
+                                    {{FM(kiko.blockedTokens || 0)}} {{ 'APP.OBS.BLO' | translate }} <i
+                                        class="bi bi-heart-fill mx-2"></i>
+                                    {{FM(attrCount(kiko.audited) || 0)}} {{ 'APP.OBS.AUD' | translate }}
+                                </small>
+                            </mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <div *ngIf="attrCount(kiko.audited) > 0" class="container-fluid mx-0 px-0">
+                                <div class="row mx-0 px-0 pt-3">
+                                    <div *ngFor="let token of obj2arr(kiko.audited)"
+                                        class="col-md-4 h-100 col-sm-6 mx-0 ps-0 pb-md-3 pb-sm-3 pb-3 pe-md-3 pe-0 pe-sm-3">
+                                        <mat-card [appearance]="'outlined'" class="overflow-hidden h-100 shadow-sm">
+                                            <mat-card-header>
+                                                <mat-card-title class="overflow-hidden">{{token.name}}
+                                                    ({{token.symbol}})</mat-card-title>
+                                                <mat-card-subtitle class="opacity-50 pt-2">
+                                                    <small>
+                                                        <i class="bi bi-clock-fill"></i> {{GTE(token.regTimestamp,
+                                                        currentTime)}}
+                                                        <i class="bi bi-check-circle-fill ms-3"></i>
+                                                        {{GTE(token.auditTimestamp, currentTime)}}
+                                                    </small>
+                                                </mat-card-subtitle>
+                                            </mat-card-header>
+                                            <mat-card-content>
+                                                <div
+                                                    class="d-flex flex-row align-items-center justify-content-between pt-2">
+                                                    <mat-progress-bar mode="determinate"
+                                                        matTooltip="{{token.bonding.toFixed(2)}}%"
+                                                        [value]="token.bonding" color="primary">
+                                                    </mat-progress-bar>
+                                                    <button mat-icon-button (click)="copy(token.mint)"
+                                                        class="ms-2 d-flex flex-row align-items-center justify-content-center"><i
+                                                            class="bi bi-copy fs-6 col-pri"></i></button>
+                                                </div>
+                                            </mat-card-content>
+                                        </mat-card>
+                                    </div>
+                                </div>
+                            </div>
+                            <div *ngIf="attrCount(kiko.audited) <= 0" class="">
+                                <app-emp [message]="'APP.OBS.NO_AUDIT'" [loaded]="kikoLoaded"></app-emp>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+            </div>
+        </ng-template>
+    </mat-tab>
+    <mat-tab>
+        <ng-template mat-tab-label>
+            <span translate>APP.TAB.T3</span>
+        </ng-template>
+        <ng-template matTabContent>
+            <div class="w-100 overflow-hidden p-3">
+                <div class="pref w-100 mx-auto my-5 p-0 overflow-hidden">
+                    <mat-card [appearance]="'outlined'" class="shadow-sm bg-bg">
+                        <mat-card-header>
+                            <mat-card-title class="px-2">{{ 'APP.TAB.T3' | translate }}</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <div class="opacity-25 px-2">
+                                <hr>
+                            </div>
+                            <span class="d-block px-2 fst-italic mb-2 opacity-50">
+                                <small translate>APP.PREF.AUTO.TITLE</small>
+                            </span>
+                            <mat-list *ngIf="connected" class="px-2">
+                                <div class="container-fluid mx-0 px-0">
+                                    <div class="row mx-0 px-0">
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.AUTO.SIM</span>
+                                                <mat-slide-toggle [ngModel]="aut.SIM" (change)="editAut('SIM', $event)"
+                                                    [hideIcon]="true"></mat-slide-toggle>
+                                            </mat-list-item>
+                                        </div>
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.AUTO.CSB</span>
+                                                <mat-slide-toggle [ngModel]="aut.CSB" (change)="editAut('CSB', $event)"
+                                                    [hideIcon]="true"></mat-slide-toggle>
+                                            </mat-list-item>
+                                        </div>
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.AUTO.AUB</span>
+                                                <mat-slide-toggle [ngModel]="aut.AUB" (change)="editAut('AUB', $event)"
+                                                    [hideIcon]="true"></mat-slide-toggle>
+                                            </mat-list-item>
+                                        </div>
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.AUTO.AUS</span>
+                                                <mat-slide-toggle [ngModel]="aut.AUS" (change)="editAut('AUS', $event)"
+                                                    [hideIcon]="true"></mat-slide-toggle>
+                                            </mat-list-item>
+                                        </div>
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.AUTO.PKD</span>
+                                                <mat-slide-toggle [ngModel]="aut.PKD" (change)="editAut('PKD', $event)"
+                                                    [hideIcon]="true"></mat-slide-toggle>
+                                            </mat-list-item>
+                                        </div>
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.AUTO.ACT</span>
+                                                <mat-slide-toggle [ngModel]="aut.ACT" (change)="editAut('ACT', $event)"
+                                                    [hideIcon]="true"></mat-slide-toggle>
+                                            </mat-list-item>
+                                        </div>
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.AUTO.BAL</span>
+                                                <mat-slide-toggle [ngModel]="aut.BAL" (change)="editAut('BAL', $event)"
+                                                    [hideIcon]="true"></mat-slide-toggle>
+                                            </mat-list-item>
+                                        </div>
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.AUTO.SAL</span>
+                                                <mat-slide-toggle [ngModel]="aut.SAL" (change)="editAut('SAL', $event)"
+                                                    [hideIcon]="true"></mat-slide-toggle>
+                                            </mat-list-item>
+                                        </div>
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.AUTO.WEN</span>
+                                                <mat-slide-toggle [ngModel]="aut.WEN" (change)="editAut('WEN', $event)"
+                                                    [hideIcon]="true"></mat-slide-toggle>
+                                            </mat-list-item>
+                                        </div>
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.AUTO.WEX</span>
+                                                <mat-slide-toggle [ngModel]="aut.WEX" (change)="editAut('WEX', $event)"
+                                                    [hideIcon]="true"></mat-slide-toggle>
+                                            </mat-list-item>
+                                        </div>
+                                    </div>
+                                </div>
+                            </mat-list>
+                            <div class="opacity-25 px-2">
+                                <hr>
+                            </div>
+                            <span class="d-block px-2 fst-italic mb-2 opacity-50">
+                                <small translate>APP.PREF.UI.TITLE</small>
+                            </span>
+                            <mat-list class="px-2">
+                                <div class="container-fluid mx-0 px-0">
+                                    <div class="row mx-0 px-0">
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.UI.DARK</span>
+                                                <app-theme-switch></app-theme-switch>
+                                            </mat-list-item>
+                                        </div>
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.UI.LANG</span>
+                                                <app-locale-switch></app-locale-switch>
+                                            </mat-list-item>
+                                        </div>
+                                        <div class="col-md-6 px-0 mx-0 pb-md-2">
+                                            <mat-list-item class="py-2 mb-2 px-0 mx-0">
+                                                <span class="d-inline-block me-4" translate>APP.PREF.UI.SART</span>
+                                                <mat-slide-toggle [ngModel]="serverAlerts"
+                                                    (change)="exp($event.checked, 'sart')"
+                                                    [hideIcon]="true"></mat-slide-toggle>
+                                            </mat-list-item>
+                                        </div>
+                                    </div>
+                                </div>
+                            </mat-list>
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+            </div>
+        </ng-template>
+    </mat-tab>
+</mat-tab-group>
