@@ -14,28 +14,28 @@
         <ng-template matTabContent>
             <mat-sidenav-container class="tx tr">
                 <mat-sidenav [(opened)]="opened"
-                    class="tr rounded-0 tx {{windowWidth > widthBreakPoint ? '' : 'mobile sidenav-mobilexxx'}} overflow-x-hidden sidenav rounded-0"
+                    class="tr bg-bg rounded-0 tx {{windowWidth > widthBreakPoint ? '' : 'mobile sidenav-mobilexxx'}} overflow-x-hidden sidenav rounded-0"
                     #sidenav [style]="{width: windowWidth > widthBreakPoint ? '340px': 'calc(100vw - 100px)'}"
                     [mode]="windowWidth > widthBreakPoint ? 'side' : 'over'">
                     <div class="p-3 w-100 overflow-hidden mt-3">
-                        <div *ngIf="connected" class="w-100 mb-3">
-                            <button mat-flat-button (click)="initialLoad()" class="rounded me-3 mb-3"><i
-                                    class="bi bi-arrow-clockwise me-2"></i> {{'APP.ACT.REL' | translate}}
+                        <div *ngIf="connected" class="w-100 mb-3 d-flex flex-row align-items-center justify-content-between flex-wrap">
+                            <button matTooltip="{{'APP.ACT.REL' | translate}}" mat-button (click)="initialLoad()" class="rounded btxx mb-3"><i
+                                    class="bi bi-arrow-clockwise me-2"></i> <!-- {{'APP.ACT.REL' | translate}} -->
                             </button>
-                            <button mat-flat-button (click)="wallet()" class="rounded me-3 mb-3"><i
-                                    class="bi bi-wallet-fill me-2"></i> {{'APP.ACT.WAL' | translate}}
+                            <button matTooltip="{{'APP.ACT.WAL' | translate}}" mat-button (click)="wallet()" class="rounded btxx mb-3"><i
+                                    class="bi bi-wallet-fill me-2"></i> <!-- {{'APP.ACT.WAL' | translate}} -->
                             </button>
-                            <button mat-flat-button (click)="recover()" class="rounded me-3 mb-3"><i
-                                    class="bi bi-x-lg me-2"></i> {{'APP.ACT.REC' | translate}}
+                            <button matTooltip="{{'APP.ACT.REC' | translate}}" mat-button (click)="recover()" class="rounded btxx mb-3"><i
+                                    class="bi bi-x-lg me-2"></i> <!-- {{'APP.ACT.REC' | translate}} -->
                             </button>
-                            <button mat-flat-button (click)="stats()" class="rounded me-3 mb-3"><i
-                                    class="bi bi-graph-up me-2"></i> {{'APP.ACT.STA' | translate}}
+                            <button matTooltip="{{'APP.ACT.STA' | translate}}" mat-button (click)="stats()" class="rounded btxx mb-3"><i
+                                    class="bi bi-graph-up me-2"></i> <!-- {{'APP.ACT.STA' | translate}} -->
                             </button>
-                            <button mat-flat-button (click)="addToken()" class="rounded me-3 mb-3"><i
-                                    class="bi bi-plus-circle-fill me-2"></i> {{'APP.TOKENS.ADD' | translate}}
+                            <button matTooltip="{{'APP.TOKENS.ADD' | translate}}" mat-button (click)="addToken()" class="rounded btxx mb-3"><i
+                                    class="bi bi-plus-circle-fill me-2"></i> <!-- {{'APP.TOKENS.ADD' | translate}} -->
                             </button>
-                            <button mat-flat-button (click)="logout()" class="rounded me-3 mb-3"><i
-                                    class="bi bi-door-closed-fill me-2"></i> {{'APP.LOGOUT.TITLE' | translate}}
+                            <button matTooltip="{{'APP.LOGOUT.TITLE' | translate}}" mat-button (click)="logout()" class="rounded btxx mb-3"><i
+                                    class="bi bi-door-closed-fill me-2"></i> <!-- {{'APP.LOGOUT.TITLE' | translate}} -->
                             </button>
                         </div>
                         <mat-expansion-panel (expandedChange)="exp($event, 'exp_tok')" class="shadowx rounded"
@@ -92,7 +92,7 @@
                                     class="col-md-12 m-0 p-0 d-flex flex-row align-items-center justify-content-between">
                                     <h1 class="display-6 m-0 p-0">{{tokens[token].name}}</h1>
                                     <button mat-button [matMenuTriggerFor]="menuRef">
-                                        <i class="bi bi-three-dots"></i>
+                                        <i class="bi bi-three-dots-vertical"></i>
                                     </button>
 
                                     <mat-menu #menuRef="matMenu">
@@ -107,6 +107,10 @@
                                         <button mat-menu-item (click)="copy(token)">
                                             <i class="bi bi-copy me-2"></i>
                                             {{'APP.TOKENS.MENU.COPY' | translate}}
+                                        </button>
+                                        <button mat-menu-item (click)="resetToken(token)">
+                                            <i class="bi bi-arrow-clockwise me-2"></i>
+                                            {{'APP.TOKENS.MENU.RESET' | translate}}
                                         </button>
                                     </mat-menu>
                                 </div>

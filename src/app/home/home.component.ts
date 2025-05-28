@@ -168,7 +168,7 @@ export class HomeComponent {
         const price = data.current_price;
         if (price && this.liveCandle) {
           if (this.liveCandle.open === undefined || this.liveCandle.open === null) {
-            this.liveCandle.open = price;
+            this.liveCandle.open = (((this.tokenData.price_history || []).slice(-1)[0] || {}).close || 0) || price;
           }
           if (this.liveCandle.high === undefined || this.liveCandle.high === null || (this.liveCandle.high && this.liveCandle.high < price)) {
             this.liveCandle.high = price;
@@ -184,9 +184,8 @@ export class HomeComponent {
           this.liveCandle.volume++;
 
           this.liveCandle.time = (Math.floor(this.currentTime / 1000));
-          
+          this.updateChart();
         }
-        this.updateChart();
       }
     });
     socket.on("note", (message: string) => {
@@ -360,7 +359,7 @@ export class HomeComponent {
           r.push(row);
         }
       }
-      this.chartData = r.concat((this.liveCandle.close ? [{...this.liveCandle, time: (((r[r.length -1].time || Date.now()) as number) + this.interval) as Time}] : []) as (CandlestickData<Time> | WhitespaceData<Time>)[]);
+      this.chartData = r.concat(((this.liveCandle.close) ? [{...this.liveCandle, time: ((((r[r.length -1] || {}).time || Math.floor(Date.now() / 1000)) as number) + Math.floor(this.interval / 1000)) as Time}] : []) as (CandlestickData<Time> | WhitespaceData<Time>)[]);
       resolve(true);
     })
   }
@@ -394,6 +393,23 @@ export class HomeComponent {
     this.expDesc = this.store.get('exp_des') == "t";
     this.selectedTabIndex = parseInt(this.store.get('tabi') || "0") || 1;
     this.currentOpt = Math.abs(Math.round(parseInt(this.store.get('copts') || "0") || 1));
+  }
+
+  resetToken(mint: string){
+    this.dia.confirm("SURE", yes => {
+      if(yes){
+        this.prel.show();
+        this.socket.emit("reset_token", mint, (done: boolean) => {
+          this.prel.hide();
+          if(done){
+            this.openToken(mint);
+          }
+          else{
+            this.alrt.show("error", "FAILED");
+          }
+        });
+      }
+    });
   }
 
   exp(e: boolean, attr: string) {

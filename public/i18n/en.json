@@ -107,7 +107,8 @@
             "MENU": {
                 "CLOSE": "Close Window",
                 "DELETE": "Delete Token",
-                "COPY": "Copy Mint"
+                "COPY": "Copy Mint",
+                "RESET": "Reset Token"
             }
         },
         "LOGOUT": {
