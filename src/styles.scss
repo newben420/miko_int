@@ -38,11 +38,11 @@ body {
     color: var(--mat-sys-on-surface);
 }
 
-.sm{
+.sm {
     font-size: 0.8rem;
 }
 
-.sm1{
+.sm1 {
     font-size: 0.6rem;
 }
 
@@ -92,13 +92,22 @@ body:not(.darkMode) mat-sidenav {
     color: var(--mat-sys-surface) !important;
 }
 
-.bg-bg{
+.bg-bg {
     background: #e0e7ee !important;
 }
 
-body.darkMode{
-    .bg-bg{
+.mat-mdc-tab-label-container {
+    border: none !important;
+    background-color: #e0e7ee !important;
+}
+
+body.darkMode {
+    .bg-bg {
         background: #191b1e !important;
+    }
+
+    .mat-mdc-tab-label-container {
+        background-color: #191b1e !important;
     }
 }
 

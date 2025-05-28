@@ -328,6 +328,7 @@ export class HomeComponent {
   expDesc: boolean = false;
   showRem: boolean = false;
   serverAlerts: boolean = true;
+  hideConfirmations: boolean = true;
 
   changeOpt(val: number) {
     this.currentOpt = val;
@@ -359,7 +360,7 @@ export class HomeComponent {
           r.push(row);
         }
       }
-      this.chartData = r.concat(((this.liveCandle.close) ? [{...this.liveCandle, time: ((((r[r.length -1] || {}).time || Math.floor(Date.now() / 1000)) as number) + Math.floor(this.interval / 1000)) as Time}] : []) as (CandlestickData<Time> | WhitespaceData<Time>)[]);
+      this.chartData = r.concat(((this.liveCandle.close) ? [{ ...this.liveCandle, time: ((((r[r.length - 1] || {}).time || Math.floor(Date.now() / 1000)) as number) + Math.floor(this.interval / 1000)) as Time }] : []) as (CandlestickData<Time> | WhitespaceData<Time>)[]);
       resolve(true);
     })
   }
@@ -390,26 +391,35 @@ export class HomeComponent {
     this.expLimit = this.store.get('exp_lim') == "t";
     this.expWhale = this.store.get('exp_wha') == "t";
     this.serverAlerts = this.store.get('sart') == "t";
+    this.hideConfirmations = this.store.get('hcon') == "t";
     this.expDesc = this.store.get('exp_des') == "t";
     this.selectedTabIndex = parseInt(this.store.get('tabi') || "0") || 1;
     this.currentOpt = Math.abs(Math.round(parseInt(this.store.get('copts') || "0") || 1));
   }
 
-  resetToken(mint: string){
-    this.dia.confirm("SURE", yes => {
-      if(yes){
-        this.prel.show();
-        this.socket.emit("reset_token", mint, (done: boolean) => {
-          this.prel.hide();
-          if(done){
-            this.openToken(mint);
-          }
-          else{
-            this.alrt.show("error", "FAILED");
-          }
-        });
-      }
-    });
+  resetToken(mint: string) {
+    const proceed = () => {
+      this.prel.show();
+      this.socket.emit("reset_token", mint, (done: boolean) => {
+        this.prel.hide();
+        if (done) {
+          this.openToken(mint);
+        }
+        else {
+          this.alrt.show("error", "FAILED");
+        }
+      });
+    }
+    if(this.hideConfirmations){
+      proceed();
+    }
+    else{
+      this.dia.confirm("SURE", yes => {
+        if (yes) {
+          proceed();
+        }
+      });
+    }
   }
 
   exp(e: boolean, attr: string) {
@@ -477,6 +487,11 @@ export class HomeComponent {
     this.windowWidth = (event.target as Window).innerWidth;
   }
 
+  toggleTokens(){
+    this.tokensExpanded = !this.tokensExpanded;
+    this.exp(this.tokensExpanded, 'exp_tok');
+  }
+
   toggleSide() {
     this.opened = !this.opened;
   }
@@ -490,15 +505,23 @@ export class HomeComponent {
   GTE = getTimeElapsed;
 
   removeToken(mint: string) {
-    this.dia.confirm('SURE', yes => {
-      if (yes) {
-        this.prel.show();
-        this.socket.emit("remove_token", mint, () => {
-          this.prel.hide();
-          this.alrt.show("success", "SUCCESS");
-        });
-      }
-    });
+    const proceed = () => {
+      this.prel.show();
+      this.socket.emit("remove_token", mint, () => {
+        this.prel.hide();
+        this.alrt.show("success", "SUCCESS");
+      });
+    }
+    if (this.hideConfirmations) {
+      proceed();
+    }
+    else {
+      this.dia.confirm('SURE', yes => {
+        if (yes) {
+          proceed();
+        }
+      });
+    }
   }
 
   ngOnInit() {
