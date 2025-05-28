@@ -49,7 +49,7 @@
                                         class="rounded {{tok.mint == token ? 'bg-bg' : ''}} overflow-hidden mb-2"
                                         *ngFor="let tok of obj2arr(tokens)">
                                         <mat-card-header class="overflow-hidden w-100">
-                                            <mat-card-title class="">
+                                            <mat-card-title (click)="openToken(tok.mint)" class="cp">
                                                 {{tok.name}}
                                             </mat-card-title>
                                             <mat-card-subtitle
@@ -65,9 +65,6 @@
                                                 <button (click)="removeToken(tok.mint)"
                                                     class="btn btn-sm sm me-3 btn-danger"><i
                                                         class="bi bi-trash"></i></button>
-                                                <button (click)="openToken(tok.mint)"
-                                                    class="btn btn-sm sm col-surf rounded bg-pri"><i
-                                                        class="bi bi-three-dots"></i></button>
                                             </mat-card-subtitle>
                                         </mat-card-header>
                                         <mat-card-content></mat-card-content>
@@ -94,13 +91,24 @@
                                 <div
                                     class="col-md-12 m-0 p-0 d-flex flex-row align-items-center justify-content-between">
                                     <h1 class="display-6 m-0 p-0">{{tokens[token].name}}</h1>
-                                    <div class="d-flex flex-row align-items-center justify-content-end">
-                                        <button (click)="removeToken(token)"
-                                            class="btn ms-2 btn-sm sm ms-3 btn-danger"><i
-                                                class="bi bi-trash"></i></button>
-                                        <button (click)="closeToken()" class="btn ms-2 btn-sm sm ms-3 btn-danger"><i
-                                                class="bi bi-x-lg"></i></button>
-                                    </div>
+                                    <button mat-button [matMenuTriggerFor]="menuRef">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+
+                                    <mat-menu #menuRef="matMenu">
+                                        <button mat-menu-item (click)="removeToken(token)">
+                                            <i class="bi bi-trash me-2"></i>
+                                            {{'APP.TOKENS.MENU.DELETE' | translate}}
+                                        </button>
+                                        <button mat-menu-item (click)="closeToken()">
+                                            <i class="bi bi-x-lg me-2"></i>
+                                            {{'APP.TOKENS.MENU.CLOSE' | translate}}
+                                        </button>
+                                        <button mat-menu-item (click)="copy(token)">
+                                            <i class="bi bi-copy me-2"></i>
+                                            {{'APP.TOKENS.MENU.COPY' | translate}}
+                                        </button>
+                                    </mat-menu>
                                 </div>
                             </div>
                             <div class="row m-0 p-0 pt-3">
@@ -389,11 +397,11 @@
                             </div>
                             <div class="row m-0 p-0 pt-3">
                                 <div *ngIf="(tokenData.whaleLog || []).length > 0"
-                                    class=" m-0 p-0 {{tokenData.description ? 'col-sm-6 pb-3 pb-sm-0 pe-0 pe-sm-3' : 'col-sm-12'}}">
+                                    class=" m-0 p-0 {{tokenData.whales ? 'col-sm-6 pb-3 pb-sm-0 pe-0 pe-sm-3' : 'col-sm-12'}}">
                                     <mat-expansion-panel [expanded]="expWhale" (expandedChange)="exp($event, 'exp_wha')"
                                         class="shadowx bg-bg rounded" [hideToggle]="false">
                                         <mat-expansion-panel-header><i class="bi bi-clock-history me-2"></i>
-                                            {{'APP.TOKENS.WL' | translate}}</mat-expansion-panel-header>
+                                            {{'APP.TOKENS.WL' | translate}} ({{(tokenData.whaleLog || []).length}})</mat-expansion-panel-header>
                                         <div class="w-100 overflow-hidden">
                                             <p class="m-0 p-0 sm pb-1"
                                                 *ngFor="let log of rev(tokenData.whaleLog || [])">
@@ -402,14 +410,14 @@
                                         </div>
                                     </mat-expansion-panel>
                                 </div>
-                                <div *ngIf="tokenData.description"
+                                <div *ngIf="tokenData.whales"
                                     class=" m-0 p-0 {{(tokenData.whaleLog || []).length > 0 ? 'col-sm-6' : 'col-sm-12'}}">
                                     <mat-expansion-panel [expanded]="expDesc" (expandedChange)="exp($event, 'exp_des')"
                                         class="shadowx bg-bg rounded" [hideToggle]="false">
-                                        <mat-expansion-panel-header><i class="bi bi-pencil-square me-2"></i>
+                                        <mat-expansion-panel-header><i class="bi bi-record-circle-fill me-2"></i>
                                             {{'APP.TOKENS.DESC' | translate}}</mat-expansion-panel-header>
-                                        <div class="w-100 overflow-hidden">
-                                            {{tokenData.description}}
+                                        <div class="w-100 overflow-hidden py-3 d-flex flex-column align-items-center justify-content-center">
+                                            <div [innerHTML]="tokenData.whales" class="d-flex flex-column align-items-start justify-content-start"></div>
                                         </div>
                                     </mat-expansion-panel>
                                 </div>

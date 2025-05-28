@@ -77,6 +77,7 @@ export class Token {
     source?: 'Telegram' | 'Kiko' | 'Unspecified' | 'Recovery';
     exit_reasons?: string[];
     entry_reasons?: string[];
+    whales?: string;
 }
 
 export class PriceHistory {

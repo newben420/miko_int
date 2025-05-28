@@ -16,6 +16,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -51,6 +52,7 @@ import { CandlestickChartComponent } from '../partial/candlestick-chart/candlest
     MatSidenavModule,
     CommonModule,
     CandlestickChartComponent,
+    MatMenuModule
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
@@ -85,6 +87,10 @@ export class HomeComponent {
     socket.on("connect", () => {
       this.connected = true;
       this.initialLoad();
+      const mint = this.store.get("token");
+      if (mint && this.tokens[mint]) {
+        this.openToken(mint);
+      }
     });
     socket.on("disconnect", () => {
       this.connected = false;
@@ -151,35 +157,37 @@ export class HomeComponent {
           (this.tokenData as any)[key] = (data as any)[key];
         }
       });
-      // if ((attrs.indexOf('price_history') >= 0) && (attrs.indexOf('current_price') < 0)) {
-      //   // Candlestick data updated.
-      //   // restart live candle.
-      //   this.liveCandle = new OHLCV();
-      // }
-      // else if ((attrs.indexOf('price_history') < 0) && (attrs.indexOf('current_price') >= 0)) {
-      //   // Price updated without candlestick data.
-      //   // update live candle.
-      //   const price = data.current_price;
-      //   if (price && this.liveCandle) {
-      //     if (this.liveCandle.open === undefined || this.liveCandle.open === null) {
-      //       this.liveCandle.open = price;
-      //     }
-      //     if (this.liveCandle.high === undefined || this.liveCandle.high === null || (this.liveCandle.high && this.liveCandle.high < price)) {
-      //       this.liveCandle.high = price;
-      //     }
-      //     if (this.liveCandle.low === undefined || this.liveCandle.low === null || (this.liveCandle.low && this.liveCandle.low > price)) {
-      //       this.liveCandle.low = price;
-      //     }
-      //     this.liveCandle.close = price;
-      //     // For volume, we just increment since we are not sending trade volume data and volume is not really used in the chart (unless we are using volume required indicators), especially the final dynamic candle.
-      //     if (this.liveCandle.volume === undefined || this.liveCandle.volume === null) {
-      //       this.liveCandle.volume = 0;
-      //     }
-      //     this.liveCandle.volume++;
+      if ((attrs.indexOf('price_history') >= 0) && (attrs.indexOf('current_price') < 0)) {
+        // Candlestick data updated.
+        // restart live candle.
+        this.liveCandle = new OHLCV();
+      }
+      else if ((attrs.indexOf('price_history') < 0) && (attrs.indexOf('current_price') >= 0)) {
+        // Price updated without candlestick data.
+        // update live candle.
+        const price = data.current_price;
+        if (price && this.liveCandle) {
+          if (this.liveCandle.open === undefined || this.liveCandle.open === null) {
+            this.liveCandle.open = price;
+          }
+          if (this.liveCandle.high === undefined || this.liveCandle.high === null || (this.liveCandle.high && this.liveCandle.high < price)) {
+            this.liveCandle.high = price;
+          }
+          if (this.liveCandle.low === undefined || this.liveCandle.low === null || (this.liveCandle.low && this.liveCandle.low > price)) {
+            this.liveCandle.low = price;
+          }
+          this.liveCandle.close = price;
+          // For volume, we just increment since we are not sending trade volume data and volume is not really used in the chart (unless we are using volume required indicators), especially the final dynamic candle.
+          if (this.liveCandle.volume === undefined || this.liveCandle.volume === null) {
+            this.liveCandle.volume = 0;
+          }
+          this.liveCandle.volume++;
 
-      //     this.liveCandle.time = Math.max(Date.now(), this.currentTime);
-      //   }
-      // }
+          this.liveCandle.time = (Math.floor(this.currentTime / 1000));
+          
+        }
+        this.updateChart();
+      }
     });
     socket.on("note", (message: string) => {
       if (this.serverAlerts) {
@@ -352,7 +360,7 @@ export class HomeComponent {
           r.push(row);
         }
       }
-      this.chartData = r;
+      this.chartData = r.concat((this.liveCandle.close ? [{...this.liveCandle, time: (((r[r.length -1].time || Date.now()) as number) + this.interval) as Time}] : []) as (CandlestickData<Time> | WhitespaceData<Time>)[]);
       resolve(true);
     })
   }
